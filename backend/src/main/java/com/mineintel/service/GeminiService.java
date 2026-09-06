@@ -97,7 +97,10 @@ public class GeminiService {
 
         } catch (Exception e) {
             log.error("Gemini API call failed: {}", e.getMessage());
-            return "AI Assistant encountered an error: " + e.getMessage();
+            if (e.getMessage().contains("429")) {
+                return "I'm receiving too many requests right now. Please wait a few seconds and try asking me again.";
+            }
+            return "AI Assistant encountered an error: Please try again later.";
         }
     }
 }

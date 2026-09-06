@@ -9,6 +9,8 @@ export default function FieldVerification() {
   const [targetData, setTargetData] = useState<any | null>(null);
   const [status, setStatus] = useState<string>('PENDING');
   const [notes, setNotes] = useState('');
+  const [sampleId, setSampleId] = useState('');
+  const [rockObservation, setRockObservation] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function FieldVerification() {
     fetch(`${API_BASE}/api/targets/${targetData?.id}/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status, notes })
+      body: JSON.stringify({ status, notes, sampleId, rockObservation })
     }).then(() => setSubmitted(true));
   };
 
@@ -75,14 +77,14 @@ export default function FieldVerification() {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Sample ID</label>
-                <input type="text" placeholder="e.g., SMP-001" className="w-full border border-slate-300 rounded px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                <input type="text" value={sampleId} onChange={(e) => setSampleId(e.target.value)} placeholder="e.g., SMP-001" className="w-full border border-slate-300 rounded px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
               </div>
             </div>
 
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Geological / Rock Observation</label>
-                <textarea rows={2} className="w-full border border-slate-300 rounded px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
+                <textarea rows={2} value={rockObservation} onChange={(e) => setRockObservation(e.target.value)} className="w-full border border-slate-300 rounded px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"></textarea>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Field Notes</label>
