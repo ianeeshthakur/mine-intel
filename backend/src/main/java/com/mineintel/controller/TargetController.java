@@ -56,6 +56,12 @@ public class TargetController {
                 .fieldNotes(request.notes())
                 .rockObservation(request.rockObservation())
                 .sampleId(request.sampleId())
+                .strike(request.strike())
+                .dip(request.dip())
+                .alterationType(request.alterationType())
+                .gpsAccuracy(request.gpsAccuracy())
+                .elevation(request.elevation())
+                .dispatchedToLab(request.dispatchedToLab())
                 .verifiedAt(LocalDateTime.now())
                 .build();
             fieldVerificationRepository.save(verification);
@@ -67,5 +73,16 @@ public class TargetController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    public record VerifyRequest(String status, String notes, String sampleId, String rockObservation) {}
+    public record VerifyRequest(
+            String status, 
+            String notes, 
+            String sampleId, 
+            String rockObservation,
+            Integer strike,
+            Integer dip,
+            String alterationType,
+            Double gpsAccuracy,
+            Double elevation,
+            Boolean dispatchedToLab
+    ) {}
 }

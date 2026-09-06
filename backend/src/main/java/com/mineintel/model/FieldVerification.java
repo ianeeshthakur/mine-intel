@@ -37,4 +37,14 @@ public class FieldVerification {
     private LocalDateTime verifiedAt;
 
     private String potentialMissingFeature; // e.g. "Regolith / surface-cover condition"
+    
+    // Advanced Geological Fields
+    private Integer strike;
+    private Integer dip;
+    private String alterationType;
+    private Double gpsAccuracy;
+    private Double elevation;
+    
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean dispatchedToLab;
 }
