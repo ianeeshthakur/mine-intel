@@ -40,8 +40,15 @@ export function useNarration(): UseNarrationReturn {
     };
   }, []);
 
-  const selectBestVoice = useCallback((availableVoices: SpeechSynthesisVoice[]) => {
+  const selectBestVoice = useCallback((availableVoices: SpeechSynthesisVoice[], langCode?: string) => {
     if (availableVoices.length === 0) return null;
+
+    if (langCode && langCode.startsWith('hi')) {
+      const hindiVoice = availableVoices.find(v => v.lang.startsWith('hi'));
+      if (hindiVoice) return hindiVoice;
+      // Fallback: note that no Hindi voice was found, will use default
+      console.warn("[Narration] No Hindi voice found, falling back to default.");
+    }
 
     // 1. Google US English
     const googleVoice = availableVoices.find(v => v.name.includes('Google') && v.lang.includes('en-US'));
@@ -61,18 +68,24 @@ export function useNarration(): UseNarrationReturn {
 
   const formatTextForSpeech = (text: string) => {
     let formatted = text;
+    // Clean markdown bolding
+    formatted = formatted.replace(/\*\*/g, '');
     // Expand percentages
     formatted = formatted.replace(/%/g, ' percent');
-    // We expect feature names to already be swapped to labels by the caller, 
-    // but just in case, clean up underscores.
+    // Clean up underscores
     formatted = formatted.replace(/_/g, ' ');
     return formatted;
   };
 
   const chunkText = (text: string): string[] => {
-    // Split by ., !, or ? followed by a space or end of string
-    const chunks = text.split(/(?<=[.!?])\s+(?=[A-Z0-9])/g).map(c => c.trim()).filter(c => c.length > 0);
+    // Split by ., !, ?, or । (Devanagari danda) followed by space or end of string
+    const chunks = text.split(/(?<=[.!?।])\s*(?=[A-Z0-9\u0900-\u097F]|$)/g).map(c => c.trim()).filter(c => c.length > 0);
     return chunks.length > 0 ? chunks : [text];
+  };
+
+  // Helper to detect if text contains Hindi characters
+  const isHindi = (text: string) => {
+    return /[\u0900-\u097F]/.test(text);
   };
 
   const playNextChunk = useCallback(() => {
@@ -108,12 +121,13 @@ export function useNarration(): UseNarrationReturn {
     isCancelledRef.current = false;
     setIsPlaying(true);
 
-    const voice = selectBestVoice(voices);
+    const langCode = isHindi(text) ? 'hi-IN' : 'en-US';
+    const voice = selectBestVoice(voices, langCode);
     
     // LOGGING FOR VERIFICATION
     console.log("[Narration] Available voices:", voices.map(v => v.name));
     if (voice) {
-      console.log("[Narration] Selected voice:", voice.name);
+      console.log("[Narration] Selected voice:", voice.name, "for lang:", langCode);
     }
 
     const formattedText = formatTextForSpeech(text);
@@ -122,6 +136,7 @@ export function useNarration(): UseNarrationReturn {
     const utterances = chunks.map(chunk => {
       const utterance = new SpeechSynthesisUtterance(chunk);
       if (voice) utterance.voice = voice;
+      utterance.lang = langCode;
       utterance.rate = 0.95; // Slightly slower
       utterance.pitch = 1.0;
       return utterance;

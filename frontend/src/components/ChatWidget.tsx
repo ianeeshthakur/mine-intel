@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { X, Send, Sparkles, Bot, User, Loader2 } from 'lucide-react';
+import { X, Send, Sparkles, Bot, User, Loader2, Volume2, Square } from 'lucide-react';
+import { useNarration } from '../hooks/useNarration';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -24,10 +25,19 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  
+  const { play, stop, isPlaying } = useNarration();
+
+  // Handle narration stop when isPlaying turns false externally
+  useEffect(() => {
+    if (!isPlaying) setPlayingIdx(null);
+  }, [isPlaying]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -188,20 +198,41 @@ export default function ChatWidget() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                  className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed relative group ${
                     msg.role === 'user'
                       ? 'bg-blue-600 text-white rounded-br-md'
                       : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md shadow-sm'
                   }`}
                 >
                   {msg.role === 'assistant' ? (
-                    <div className="whitespace-pre-wrap"
-                         dangerouslySetInnerHTML={{
-                           __html: msg.content
-                             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                             .replace(/\n/g, '<br/>')
-                         }}
-                    />
+                    <div>
+                      <div className="whitespace-pre-wrap"
+                           dangerouslySetInnerHTML={{
+                             __html: msg.content
+                               .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                               .replace(/\n/g, '<br/>')
+                           }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (playingIdx === idx) {
+                            stop();
+                            setPlayingIdx(null);
+                          } else {
+                            play(msg.content);
+                            setPlayingIdx(idx);
+                          }
+                        }}
+                        className="mt-2 text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-1.5 text-[10px] font-semibold"
+                        title={playingIdx === idx ? "Stop speaking" : "Listen"}
+                      >
+                        {playingIdx === idx ? (
+                          <><Square className="w-3.5 h-3.5" /> Stop</>
+                        ) : (
+                          <><Volume2 className="w-3.5 h-3.5" /> Listen</>
+                        )}
+                      </button>
+                    </div>
                   ) : (
                     msg.content
                   )}

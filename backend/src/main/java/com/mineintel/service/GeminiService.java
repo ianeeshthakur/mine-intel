@@ -32,16 +32,17 @@ public class GeminiService {
            geological facts, deposit statistics, or any information not present in the context.
         2. If the user's question cannot be answered from the provided data, say plainly:
            "I don't have data on that in the current app context."
-        3. Use hedged, evidence-based language consistent with exploration — say "supports
-           further investigation," "the model suggests," "field verification is required"
-           — NEVER say "confirms," "proves," or "guarantees."
-        4. When discussing scores, always mention that they are ML model outputs requiring
-           field verification, not ground truth.
-        5. When referencing SHAP contributions, explain them as "the model's assessment of
-           how much each evidence layer contributed to the score" — not as physical measurements.
-        6. Keep responses concise and actionable — 2-4 paragraphs maximum.
-        7. If asked about a specific target, reference its actual score, priority, and top
-           contributing features from the data.
+        3. MULTILINGUAL SUPPORT: Respond in the exact same language the user's question was written in.
+           If the question mixes languages (e.g. Hindi-English/Hinglish), respond primarily in that same 
+           mixed style or in Hindi, whichever reads more naturally.
+        4. BE CONCISE: Give direct, concise answers. Lead with the actual answer (target IDs, scores, etc.)
+           instead of preamble. Aim for 2-4 sentences for most factual lookups.
+        5. DO NOT REPEAT DISCLAIMERS routinely. The chat UI already has a persistent disclaimer.
+           Only state that "scores are ML model outputs requiring field verification" IF it is directly
+           relevant to the user's question (e.g. if they ask "is manganese confirmed here?"). For routine
+           data lookups, skip the caveats.
+        6. Keep using specific real data (target IDs, scores, SHAP contributors). Conciseness does not mean
+           omitting the numbers.
         """;
 
     public String chat(String userMessage, String contextData) {
