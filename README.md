@@ -1,0 +1,130 @@
+# MINE-INTEL
+
+**Manganese Exploration Intelligence Platform**  
+*Explore with Evidence. Decide with Confidence.*
+
+> Built for Smart India Hackathon 2026 — Problem Statement 26009:  
+> *"Using AI/ML and Space Technology to Identify Manganese Reserves and Overcome Production Shortfalls."*
+
+---
+
+## What is MINE-INTEL?
+
+MINE-INTEL is an **AI-assisted exploration decision intelligence platform** designed for MOIL-style manganese exploration in the Balaghat region (Madhya Pradesh). It combines satellite evidence, geological data, soil properties, terrain analysis, structural geology, and known mineralization to produce explainable target rankings.
+
+> **Core Philosophy:** AI does not declare that manganese exists. AI identifies where exploration evidence is strongest and tells the geologist *WHY.*
+
+---
+
+## Key Features
+
+- 🗺️ **Prospectivity Explorer** — Interactive heatmap + clustered target markers on a live basemap
+- 🎯 **Target Intelligence** — Evidence scorecard, counter-evidence, unknowns, and next best action
+- 🔍 **Explainable AI** — Every score is backed by the evidence that generated it
+- 🏗️ **Field Verification** — Log field results and trigger the learning loop
+- 🤖 **Prediction Diagnostic** — "Model Was Wrong" workflow that identifies missing features
+- 📉 **Production Intelligence** — Shortfall forecasting and corrective action recommendations
+- 🩺 **Data Health** — Real-time view of data pipeline status
+
+---
+
+## Architecture
+
+```
+/frontend   → React + TypeScript + Tailwind CSS + Leaflet
+/backend    → Java 21 + Spring Boot 4 + H2 (dev) / PostgreSQL (prod)
+```
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Java 21+ (or JDK 26+)
+- (Optional) Docker for PostgreSQL in production
+
+### 1. Start the Backend
+
+```bash
+cd backend
+./gradlew bootRun
+```
+
+The Spring Boot server starts on **http://localhost:8080**.  
+It auto-seeds 100 simulated exploration targets for the Balaghat region on startup.
+
+### 2. Start the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The Vite dev server starts on **http://localhost:5173** (or 5174 if the port is busy).
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/targets` | List all priority targets (ranked by score) |
+| GET | `/api/targets/:id` | Get single target by DB ID |
+| GET | `/api/targets/by-target-id/:targetId` | Get target by label (e.g. T-047) |
+| POST | `/api/targets/:id/verify` | Submit field verification result |
+| GET | `/api/production/forecast` | Get current production shortfall forecast |
+
+---
+
+## Demo Story (3–5 min)
+
+1. Open **Command Center** — see metrics and prospectivity heatmap over Balaghat
+2. Click **Analyze Exploration Area** — watch the 6-stage AI fusion pipeline
+3. Open **Prospectivity Explorer** — click any cluster to zoom in, click a target to open the Intelligence Panel
+4. In the panel: read the evidence, counter-evidence, and unknowns
+5. Click **Execute Field Verification** — select *Not Confirmed*
+6. Watch the **Prediction Diagnostic** and **Learning Loop** — find the missing feature
+7. Switch to **Production Intelligence** — view the shortfall forecast and corrective actions
+
+---
+
+## Data Sources (Intended for Production)
+
+| Layer | Source |
+|-------|--------|
+| Satellite | Sentinel-2, Sentinel-1 (ESA/Copernicus), Landsat (USGS) |
+| Geology | NGDR / GSI |
+| Spectral Reference | USGS Spectral Library |
+| Soil | SoilGrids |
+| Terrain | Copernicus DEM / SRTM |
+| Ground Truth | MOIL / GSI field data |
+| Map Tiles | CartoDB Positron (no API key required) |
+
+> ⚠️ All data in this prototype is **simulated demo data** and does not represent actual MOIL measurements.
+
+---
+
+## Database
+
+The prototype uses **H2 in-memory** by default (no setup needed). To switch to PostgreSQL:
+
+```bash
+docker compose up -d   # starts PostGIS container
+```
+
+Then update `backend/src/main/resources/application.yml` to point to PostgreSQL.
+
+---
+
+## SIH 2026 — PS 26009
+
+This prototype addresses both components of the problem statement:
+
+1. **Exploration Intelligence** — AI/ML + satellite data to rank manganese exploration targets with explainable evidence chains
+2. **Production Intelligence** — Forecasting production shortfalls and recommending corrective actions
+
+---
+
+*MINE-INTEL does not replace the geologist. It helps the geologist decide WHERE to look, WHY to look there, and WHAT to do when reality disagrees with the model.*

@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --color-primary: #1d4ed8;
+  --color-primary-light: #3b82f6;
+  --color-secondary: #0f172a;
+  
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+  
+  --color-prospect-high: #f97316; /* Orange for high prospectivity */
+  --color-prospect-extreme: #dc2626; /* Red for extreme prospectivity */
+  
+  --color-bg-main: #f8fafc;
+  --color-bg-card: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    margin: 0;
+  }
+}
+
+/* Custom Scrollbar for scientific look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400;
+}

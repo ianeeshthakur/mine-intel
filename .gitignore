@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+build/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Java / Gradle
+.gradle/
+build/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.war
+
+# Spring Boot
+/backend/build/
+
+# H2 database files
+*.db
+*.mv.db
+*.trace.db
