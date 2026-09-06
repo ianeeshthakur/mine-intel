@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Map, Compass, HardHat, Server, Activity, ArrowRight } from 'lucide-react';
+import { Map, Compass, HardHat, Server, Activity, ArrowRight, FileText } from 'lucide-react';
 import ChatWidget from '../ChatWidget';
 
 export default function MainLayout() {
@@ -9,6 +9,7 @@ export default function MainLayout() {
     { to: "/explorer", icon: <Map className="w-5 h-5" />, label: "Prospectivity Explorer" },
     { to: "/verification", icon: <HardHat className="w-5 h-5" />, label: "Field Verification" },
     { to: "/production", icon: <ArrowRight className="w-5 h-5" />, label: "Production Intelligence" },
+    { to: "/reports-impact", icon: <FileText className="w-5 h-5" />, label: "Reports & Impact" },
     { to: "/data-health", icon: <Server className="w-5 h-5" />, label: "Data Health" },
   ];
 

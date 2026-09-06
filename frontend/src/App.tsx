@@ -6,6 +6,7 @@ import ProspectivityExplorer from './pages/ProspectivityExplorer';
 import FieldVerification from './pages/FieldVerification';
 import ProductionIntelligence from './pages/ProductionIntelligence';
 import DataHealth from './pages/DataHealth';
+import ReportsImpact from './pages/ReportsImpact';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="explorer" element={<ProspectivityExplorer />} />
           <Route path="verification" element={<FieldVerification />} />
           <Route path="production" element={<ProductionIntelligence />} />
+          <Route path="reports-impact" element={<ReportsImpact />} />
           <Route path="data-health" element={<DataHealth />} />
         </Route>
       </Routes>
