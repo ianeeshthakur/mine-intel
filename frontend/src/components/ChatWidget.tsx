@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { X, Send, Sparkles, Bot, User, Loader2, Volume2, Square } from 'lucide-react';
+import { Send, Sparkles, Bot, Loader2, Volume2, Square, PanelRightClose, MessageSquare, CheckCircle } from 'lucide-react';
 import { useNarration } from '../hooks/useNarration';
 
 interface ChatMessage {
@@ -118,101 +118,106 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Floating Action Button */}
+      {/* Drawer Trigger - Right edge handle */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center hover:scale-105 active:scale-95 group"
-          title="Ask AI Assistant"
+          className="fixed top-1/2 right-0 -translate-y-1/2 z-40 bg-white border border-r-0 border-slate-200 shadow-[-2px_0_8px_rgba(0,0,0,0.05)] rounded-l-xl px-2 py-8 flex flex-col items-center gap-2 hover:bg-slate-50 transition-colors group"
           id="chat-widget-trigger"
         >
-          <Sparkles className="w-6 h-6 group-hover:rotate-12 transition-transform" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white animate-pulse" />
+          <div className="relative">
+            <Sparkles className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" />
+          </div>
+          <span className="writing-vertical text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2" style={{ writingMode: 'vertical-rl' }}>AI Intel</span>
         </button>
       )}
 
-      {/* Chat Panel */}
-      {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[420px] h-[600px] bg-white rounded-2xl shadow-2xl shadow-slate-900/20 border border-slate-200 flex flex-col overflow-hidden animate-in"
-             id="chat-widget-panel"
-             style={{
-               animation: 'slideUp 0.3s ease-out',
-             }}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                <Bot className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm leading-tight">MINE-INTEL AI</h3>
-                <p className="text-[11px] text-blue-200 leading-tight mt-0.5">
-                  {targetId ? `Viewing ${targetId}` : currentPage}
+      {/* Slide-in Drawer */}
+      <div 
+        className={`fixed top-[68px] right-0 bottom-0 w-[420px] bg-white border-l border-slate-200 shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        id="chat-widget-panel"
+      >
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-slate-200 bg-white flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center border border-blue-100">
+              <Bot className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-bold text-[14px] text-slate-800 leading-tight">MINE-INTEL AI</h3>
+              <p className="text-[11px] font-medium text-slate-500 leading-tight mt-0.5">Your exploration intelligence assistant</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-1.5 rounded hover:bg-slate-100 text-slate-400 transition-colors"
+          >
+            <PanelRightClose className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Context Strip */}
+        <div className="bg-emerald-50/50 border-b border-emerald-100 px-5 py-2 flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+          <CheckCircle className="w-3.5 h-3.5" />
+          Context Loaded: {targetId ? `Target ${targetId}, ` : ''}{currentPage}
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto px-5 py-6 bg-[#f8fafc] space-y-6">
+          {messages.length === 0 && (
+            <div className="flex flex-col h-full">
+              <div className="mb-6">
+                <h4 className="text-[13px] font-bold text-slate-800 mb-1">How can I help?</h4>
+                <p className="text-[12px] text-slate-500 leading-relaxed">
+                  I can analyze the current region, explain target scoring, or summarize exploration priorities. I rely exclusively on verified application data.
                 </p>
+              </div>
+              
+              <div className="space-y-2">
+                {[
+                  targetId ? `Why is ${targetId} high priority?` : 'Show me the top 5 targets.',
+                  'What does the SHAP analysis tell us?',
+                  'What should we verify in the field?',
+                  'What are the strongest prospectivity areas?'
+                ].map((suggestion, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setInput(suggestion); setTimeout(() => inputRef.current?.focus(), 50); }}
+                    className="w-full text-left flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-[10px] hover:border-blue-300 hover:shadow-sm transition-all group"
+                  >
+                    <MessageSquare className="w-4 h-4 text-slate-400 mt-0.5 group-hover:text-blue-500" />
+                    <span className="text-[12px] font-medium text-slate-600 group-hover:text-slate-900 leading-snug">"{suggestion}"</span>
+                  </button>
+                ))}
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-full hover:bg-white/20 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          )}
 
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-slate-50">
-            {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center h-full text-center px-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mb-4">
-                  <Sparkles className="w-8 h-8 text-blue-600" />
+          {messages.map((msg, idx) => (
+            <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.role === 'assistant' && (
+                <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Bot className="w-3.5 h-3.5 text-blue-600" />
                 </div>
-                <h4 className="text-sm font-bold text-slate-800 mb-1">How can I help?</h4>
-                <p className="text-xs text-slate-500 leading-relaxed mb-5">
-                  Ask me about targets, scores, evidence layers, or the exploration region.
-                  I only reference real app data — never invented facts.
-                </p>
-                <div className="space-y-2 w-full">
-                  {[
-                    targetId ? `Why does ${targetId} have its current score?` : 'Which targets have the highest prospectivity?',
-                    'What does the SHAP analysis tell us?',
-                    'Summarize the exploration region status',
-                  ].map((suggestion, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { setInput(suggestion); setTimeout(() => inputRef.current?.focus(), 50); }}
-                      className="w-full text-left text-xs px-3 py-2.5 bg-white border border-slate-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors text-slate-600"
-                    >
-                      "{suggestion}"
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                {msg.role === 'assistant' && (
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Bot className="w-3.5 h-3.5 text-white" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed relative group ${
-                    msg.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-md'
-                      : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md shadow-sm'
-                  }`}
-                >
-                  {msg.role === 'assistant' ? (
-                    <div>
-                      <div className="whitespace-pre-wrap"
-                           dangerouslySetInnerHTML={{
-                             __html: msg.content
-                               .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                               .replace(/\n/g, '<br/>')
-                           }}
-                      />
+              )}
+              <div
+                className={`max-w-[85%] px-4 py-3 text-[13px] leading-relaxed relative ${
+                  msg.role === 'user'
+                    ? 'bg-blue-600 text-white rounded-l-2xl rounded-tr-2xl'
+                    : 'bg-white border border-slate-200 text-slate-700 rounded-r-2xl rounded-bl-2xl shadow-sm'
+                }`}
+              >
+                {msg.role === 'assistant' ? (
+                  <div>
+                    <div className="whitespace-pre-wrap"
+                         dangerouslySetInnerHTML={{
+                           __html: msg.content
+                             .replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 font-bold">$1</strong>')
+                             .replace(/\n/g, '<br/>')
+                         }}
+                    />
+                    <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
                       <button
                         onClick={() => {
                           if (playingIdx === idx) {
@@ -223,81 +228,70 @@ export default function ChatWidget() {
                             setPlayingIdx(idx);
                           }
                         }}
-                        className="mt-2 text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-1.5 text-[10px] font-semibold"
+                        className="text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider"
                         title={playingIdx === idx ? "Stop speaking" : "Listen"}
                       >
                         {playingIdx === idx ? (
-                          <><Square className="w-3.5 h-3.5" /> Stop</>
+                          <><Square className="w-3 h-3" /> Stop</>
                         ) : (
-                          <><Volume2 className="w-3.5 h-3.5" /> Listen</>
+                          <><Volume2 className="w-3 h-3" /> Listen</>
                         )}
                       </button>
                     </div>
-                  ) : (
-                    msg.content
-                  )}
-                </div>
-                {msg.role === 'user' && (
-                  <div className="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <User className="w-3.5 h-3.5 text-slate-600" />
                   </div>
+                ) : (
+                  msg.content
                 )}
               </div>
-            ))}
+            </div>
+          ))}
 
-            {isLoading && (
-              <div className="flex gap-2.5 justify-start">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-3.5 h-3.5 text-white" />
-                </div>
-                <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                    <span>Analyzing data…</span>
-                  </div>
+          {isLoading && (
+            <div className="flex gap-3 justify-start">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Bot className="w-3.5 h-3.5 text-blue-600" />
+              </div>
+              <div className="bg-white border border-slate-200 rounded-r-2xl rounded-bl-2xl px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-2 text-[12px] font-semibold text-slate-500">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500" />
+                  <span>Synthesizing intelligence…</span>
                 </div>
               </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input Area */}
-          <div className="px-4 py-3 border-t border-slate-200 bg-white flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={targetId ? `Ask about ${targetId}…` : 'Ask about the exploration region…'}
-                className="flex-1 text-sm px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-slate-400 transition-all"
-                disabled={isLoading}
-                id="chat-widget-input"
-              />
-              <button
-                onClick={sendMessage}
-                disabled={!input.trim() || isLoading}
-                className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
-                id="chat-widget-send"
-              >
-                <Send className="w-4 h-4" />
-              </button>
             </div>
-            <p className="text-[10px] text-slate-400 mt-1.5 text-center">
-              Grounded in real app data • Never invents geological facts
-            </p>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4 bg-white border-t border-slate-200 flex-shrink-0">
+          <div className="relative">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={targetId ? `Ask about ${targetId}…` : 'Ask about the exploration region…'}
+              className="w-full text-[13px] font-medium pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-400 transition-all shadow-sm"
+              disabled={isLoading}
+              id="chat-widget-input"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || isLoading}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 disabled:hover:bg-blue-600 transition-colors"
+              id="chat-widget-send"
+            >
+              <Send className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+            <Sparkles className="w-3 h-3" />
+            Grounded in real app data
           </div>
         </div>
-      )}
-
-      <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-      `}</style>
+      </div>
     </>
   );
 }
