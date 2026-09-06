@@ -143,10 +143,14 @@
                     <!-- Header -->
                     <div class="bg-white/80 px-5 py-4 border-b border-slate-100">
                         <div class="flex justify-between items-start">
-                            <div>
-                                <div class="text-[10px] font-bold text-slate-400 tracking-wider">SELECTED TARGET</div>
-                                <h2 class="text-xl font-extrabold text-slate-900">T-047</h2>
-                                <p class="text-xs text-slate-500 mt-0.5 font-mono">22.4312° N, 76.8921° E</p>
+                            <div class="w-full">
+                                <div class="text-[10px] font-bold text-slate-400 tracking-wider mb-1">SELECT TARGET</div>
+                                <select id="target-selector" onchange="updateTarget()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 font-bold mb-2">
+                                    <option value="T-047">T-047 (VERY HIGH)</option>
+                                    <option value="T-060">T-060 (HIGH)</option>
+                                    <option value="T-012">T-012 (LOW)</option>
+                                </select>
+                                <p id="target-coords" class="text-xs text-slate-500 mt-0.5 font-mono">22.4312° N, 76.8921° E</p>
                             </div>
                         </div>
                     </div>
@@ -154,12 +158,12 @@
                     <div class="flex-1 overflow-y-auto p-5 space-y-6">
                         
                         <!-- Score -->
-                        <div class="bg-white rounded-lg border border-red-100 p-4 shadow-sm relative overflow-hidden">
-                            <div class="absolute right-0 top-0 bottom-0 w-2 bg-red-500"></div>
+                        <div id="score-card" class="bg-white rounded-lg border border-red-100 p-4 shadow-sm relative overflow-hidden">
+                            <div id="score-bar" class="absolute right-0 top-0 bottom-0 w-2 bg-red-500"></div>
                             <div class="text-xs font-bold text-slate-500 mb-1 uppercase">Prospectivity</div>
                             <div class="flex items-baseline gap-2">
-                                <span class="text-3xl font-extrabold text-slate-900">94.8</span>
-                                <span class="text-xs font-bold bg-red-50 text-red-700 px-2 py-1 rounded border border-red-100">VERY HIGH</span>
+                                <span id="target-score" class="text-3xl font-extrabold text-slate-900">94.8</span>
+                                <span id="target-priority" class="text-xs font-bold bg-red-50 text-red-700 px-2 py-1 rounded border border-red-100">VERY HIGH</span>
                             </div>
                         </div>
 
@@ -175,40 +179,40 @@
                                 <div>
                                     <div class="flex justify-between text-xs mb-1">
                                         <span class="font-medium flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5 text-emerald-500"></i> Lithology</span>
-                                        <span class="font-bold text-emerald-600">+31%</span>
+                                        <span id="shap-lith" class="font-bold text-emerald-600">+31%</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-1.5">
-                                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 31%"></div>
+                                        <div id="bar-lith" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 31%"></div>
                                     </div>
                                 </div>
 
                                 <div>
                                     <div class="flex justify-between text-xs mb-1">
                                         <span class="font-medium flex items-center gap-1.5"><i data-lucide="activity" class="w-3.5 h-3.5 text-purple-500"></i> Structure</span>
-                                        <span class="font-bold text-purple-600">+24%</span>
+                                        <span id="shap-struct" class="font-bold text-purple-600">+24%</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-1.5">
-                                        <div class="bg-purple-500 h-1.5 rounded-full" style="width: 24%"></div>
+                                        <div id="bar-struct" class="bg-purple-500 h-1.5 rounded-full transition-all duration-500" style="width: 24%"></div>
                                     </div>
                                 </div>
 
                                 <div>
                                     <div class="flex justify-between text-xs mb-1">
                                         <span class="font-medium flex items-center gap-1.5"><i data-lucide="satellite" class="w-3.5 h-3.5 text-blue-500"></i> Spectral Signal</span>
-                                        <span class="font-bold text-blue-600">+21%</span>
+                                        <span id="shap-spec" class="font-bold text-blue-600">+21%</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-1.5">
-                                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: 21%"></div>
+                                        <div id="bar-spec" class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width: 21%"></div>
                                     </div>
                                 </div>
 
                                 <div>
                                     <div class="flex justify-between text-xs mb-1">
                                         <span class="font-medium flex items-center gap-1.5"><i data-lucide="mountain" class="w-3.5 h-3.5 text-amber-500"></i> Terrain/DEM</span>
-                                        <span class="font-bold text-amber-600">+12%</span>
+                                        <span id="shap-ter" class="font-bold text-amber-600">+12%</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-1.5">
-                                        <div class="bg-amber-500 h-1.5 rounded-full" style="width: 12%"></div>
+                                        <div id="bar-ter" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 12%"></div>
                                     </div>
                                 </div>
                             </div>
@@ -224,6 +228,63 @@
 
 <script>
     lucide.createIcons();
+
+    const targets = {
+        'T-047': {
+            coords: '22.4312° N, 76.8921° E',
+            score: '94.8',
+            priority: 'VERY HIGH',
+            p_class: 'bg-red-50 text-red-700 border-red-100',
+            card_class: 'border-red-100',
+            bar_color: 'bg-red-500',
+            shap: { lith: 31, struct: 24, spec: 21, ter: 12 }
+        },
+        'T-060': {
+            coords: '22.4285° N, 76.9011° E',
+            score: '76.2',
+            priority: 'HIGH',
+            p_class: 'bg-orange-50 text-orange-700 border-orange-100',
+            card_class: 'border-orange-100',
+            bar_color: 'bg-orange-500',
+            shap: { lith: 22, struct: 15, spec: 38, ter: 8 }
+        },
+        'T-012': {
+            coords: '22.4410° N, 76.8850° E',
+            score: '34.1',
+            priority: 'LOW',
+            p_class: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+            card_class: 'border-emerald-100',
+            bar_color: 'bg-emerald-500',
+            shap: { lith: 10, struct: 5, spec: 12, ter: 45 }
+        }
+    };
+
+    function updateTarget() {
+        const id = document.getElementById('target-selector').value;
+        const t = targets[id];
+        
+        document.getElementById('target-coords').innerText = t.coords;
+        document.getElementById('target-score').innerText = t.score;
+        
+        const prio = document.getElementById('target-priority');
+        prio.innerText = t.priority;
+        prio.className = `text-xs font-bold px-2 py-1 rounded border ${t.p_class}`;
+        
+        document.getElementById('score-card').className = `bg-white rounded-lg border p-4 shadow-sm relative overflow-hidden ${t.card_class}`;
+        document.getElementById('score-bar').className = `absolute right-0 top-0 bottom-0 w-2 ${t.bar_color}`;
+
+        document.getElementById('shap-lith').innerText = `+${t.shap.lith}%`;
+        document.getElementById('bar-lith').style.width = `${t.shap.lith}%`;
+        
+        document.getElementById('shap-struct').innerText = `+${t.shap.struct}%`;
+        document.getElementById('bar-struct').style.width = `${t.shap.struct}%`;
+        
+        document.getElementById('shap-spec').innerText = `+${t.shap.spec}%`;
+        document.getElementById('bar-spec').style.width = `${t.shap.spec}%`;
+        
+        document.getElementById('shap-ter').innerText = `+${t.shap.ter}%`;
+        document.getElementById('bar-ter').style.width = `${t.shap.ter}%`;
+    }
 </script>
 </body>
 </html>
