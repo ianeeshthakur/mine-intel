@@ -1,9 +1,21 @@
-
 import { useNavigate } from 'react-router-dom';
-import { MapPin, ShieldAlert, ArrowRight, BookOpen, AlertTriangle } from 'lucide-react';
+import { MapPin, ShieldAlert, ArrowRight, BookOpen, AlertTriangle, Volume2, Square } from 'lucide-react';
+import { useNarration } from '../../hooks/useNarration';
 
 export default function TargetIntelligencePanel({ target }: { target: any }) {
   const navigate = useNavigate();
+  const { play, stop, isPlaying, currentCaption } = useNarration();
+
+  const handleListen = () => {
+    if (isPlaying) {
+      stop();
+    } else {
+      if (target.explanationText) {
+        // Construct a full narrative combining the explanation and any other relevant text
+        play(target.explanationText);
+      }
+    }
+  };
 
   return (
     <div className="p-5 space-y-8 bg-white">
@@ -41,10 +53,32 @@ export default function TargetIntelligencePanel({ target }: { target: any }) {
 
       {/* Why this target? (Evidence FOR) */}
       <div>
-        <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-blue-600" />
-          AI-Generated Explanation (model feature importance)
-        </h3>
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-blue-600" />
+            AI-Generated Explanation
+          </h3>
+          {target.mlScored && target.explanationText && (
+            <button
+              onClick={handleListen}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                isPlaying 
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200' 
+                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+              }`}
+            >
+              {isPlaying ? (
+                <>
+                  <Square className="w-3.5 h-3.5 fill-current" /> Stop
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-3.5 h-3.5" /> Listen
+                </>
+              )}
+            </button>
+          )}
+        </div>
         
         {target.mlScored && target.featureContributionsJson ? (
           <>
@@ -77,8 +111,15 @@ export default function TargetIntelligencePanel({ target }: { target: any }) {
               })}
             </div>
             {target.explanationText && (
-              <div className="mt-4 p-3 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100 leading-relaxed">
+              <div className="mt-4 p-3 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100 leading-relaxed relative">
                 {target.explanationText}
+                
+                {/* Active Caption Overlay */}
+                {isPlaying && currentCaption && (
+                  <div className="mt-3 p-2 bg-blue-900 text-white font-medium rounded shadow-inner text-center animate-pulse">
+                    "{currentCaption}"
+                  </div>
+                )}
               </div>
             )}
           </>
