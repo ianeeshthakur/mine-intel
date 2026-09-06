@@ -18,7 +18,7 @@ import java.util.Map;
 public class GeminiService {
 
     private static final String GEMINI_API_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
