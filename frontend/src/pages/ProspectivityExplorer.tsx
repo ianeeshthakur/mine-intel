@@ -205,6 +205,7 @@ function Checkbox({ label, checked, onChange, color }: {
 }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer group">
+      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
       <div
         className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
           checked ? 'border-transparent' : 'bg-white border-slate-300 group-hover:border-blue-400'

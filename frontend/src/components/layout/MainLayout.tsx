@@ -1,6 +1,5 @@
-import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Map, Layers, Target, Compass, HardHat, Server, Activity, ArrowRight } from 'lucide-react';
+import { Map, Compass, HardHat, Server, Activity, ArrowRight } from 'lucide-react';
 
 export default function MainLayout() {
   const navItems = [

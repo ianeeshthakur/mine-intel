@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { MapPin, ShieldAlert, ArrowRight, BookOpen, AlertTriangle } from 'lucide-react';
 

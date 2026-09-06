@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 // Floating legend that sits inside the map card (position: absolute inside relative parent)
 export default function ProspectivityLegend() {
