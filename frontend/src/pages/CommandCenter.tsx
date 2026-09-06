@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, RotateCcw, Map as MapIcon, Target, CheckCircle, Activity, Info } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Polygon, Popup } from 'react-leaflet';
@@ -9,7 +9,6 @@ import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 import HeatmapLayer from '../components/HeatmapLayer';
 import ProspectivityLegend from '../components/ProspectivityLegend';
 import { createProspectivityClusterIcon } from '../components/createProspectivityClusterIcon';
-import ClusterBoundaryPolygons from '../components/ClusterBoundaryPolygons';
 
 // Approximate Balaghat exploration boundary polygon (covering ~1,000 km²)
 const BALAGHAT_BOUNDARY: [number, number][] = [
@@ -23,7 +22,6 @@ const BALAGHAT_BOUNDARY: [number, number][] = [
 ];
 
 export default function CommandCenter() {
-  const clusterRef = useRef(null);
   const navigate = useNavigate();
   const [targets, setTargets] = useState<any[]>([]);
 
@@ -136,7 +134,7 @@ export default function CommandCenter() {
                   points={targets.map(t => [t.latitude, t.longitude, t.prospectivityScore / 100.0])}
                 />
 
-                <MarkerClusterGroup ref={clusterRef} iconCreateFunction={createProspectivityClusterIcon} maxClusterRadius={60}>
+                <MarkerClusterGroup iconCreateFunction={createProspectivityClusterIcon} maxClusterRadius={60}>
                   {targets.map(target => (
                     <CircleMarker
                       key={target.id}
@@ -169,8 +167,6 @@ export default function CommandCenter() {
                     </CircleMarker>
                   ))}
                 </MarkerClusterGroup>
-                
-                <ClusterBoundaryPolygons clusterGroupRef={clusterRef} />
               </MapContainer>
 
               <ProspectivityLegend />

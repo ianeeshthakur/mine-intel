@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Polygon, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
@@ -10,7 +10,6 @@ import HeatmapLayer from '../components/HeatmapLayer';
 import ProspectivityLegend from '../components/ProspectivityLegend';
 import TargetIntelligencePanel from '../components/intelligence/TargetIntelligencePanel';
 import { createProspectivityClusterIcon } from '../components/createProspectivityClusterIcon';
-import ClusterBoundaryPolygons from '../components/ClusterBoundaryPolygons';
 
 // Approximate Balaghat exploration boundary
 const BALAGHAT_BOUNDARY: [number, number][] = [
@@ -19,7 +18,6 @@ const BALAGHAT_BOUNDARY: [number, number][] = [
 ];
 
 export default function ProspectivityExplorer() {
-  const clusterRef = useRef(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedTargetId = searchParams.get('target');
 
@@ -121,32 +119,29 @@ export default function ProspectivityExplorer() {
 
           {/* Clustered priority targets — independent of heatmap */}
           {layers.priorityTargets && (
-            <>
-              <MarkerClusterGroup ref={clusterRef} iconCreateFunction={createProspectivityClusterIcon} maxClusterRadius={60}>
-                {targets.map(target => (
-                  <CircleMarker
-                    key={target.id}
-                    center={[target.latitude, target.longitude]}
-                    radius={selectedTargetId === target.targetId ? 12 : (target.prospectivityScore > 90 ? 8 : 6)}
-                    // @ts-ignore — custom prop consumed by createProspectivityClusterIcon
-                    targetData={target}
-                    eventHandlers={{
-                      click: () => {
-                        setSelectedTargetData(target);
-                        setSearchParams({ target: target.targetId });
-                      }
-                    }}
-                    pathOptions={{
-                      color: '#ffffff',
-                      weight: selectedTargetId === target.targetId ? 3 : 2,
-                      fillColor: selectedTargetId === target.targetId ? '#1d4ed8' : (target.prospectivityScore > 90 ? '#dc2626' : '#f97316'),
-                      fillOpacity: selectedTargetId === target.targetId ? 0.95 : 0.88,
-                    }}
-                  />
-                ))}
-              </MarkerClusterGroup>
-              <ClusterBoundaryPolygons clusterGroupRef={clusterRef} />
-            </>
+            <MarkerClusterGroup iconCreateFunction={createProspectivityClusterIcon} maxClusterRadius={60}>
+              {targets.map(target => (
+                <CircleMarker
+                  key={target.id}
+                  center={[target.latitude, target.longitude]}
+                  radius={selectedTargetId === target.targetId ? 12 : (target.prospectivityScore > 90 ? 8 : 6)}
+                  // @ts-ignore — custom prop consumed by createProspectivityClusterIcon
+                  targetData={target}
+                  eventHandlers={{
+                    click: () => {
+                      setSelectedTargetData(target);
+                      setSearchParams({ target: target.targetId });
+                    }
+                  }}
+                  pathOptions={{
+                    color: '#ffffff',
+                    weight: selectedTargetId === target.targetId ? 3 : 2,
+                    fillColor: selectedTargetId === target.targetId ? '#1d4ed8' : (target.prospectivityScore > 90 ? '#dc2626' : '#f97316'),
+                    fillOpacity: selectedTargetId === target.targetId ? 0.95 : 0.88,
+                  }}
+                />
+              ))}
+            </MarkerClusterGroup>
           )}
 
           <MapEffect center={selectedTargetData ? [selectedTargetData.latitude, selectedTargetData.longitude] : null} />
