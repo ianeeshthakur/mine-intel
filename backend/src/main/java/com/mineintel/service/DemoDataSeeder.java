@@ -39,9 +39,9 @@ public class DemoDataSeeder {
         for (int i = 1; i <= 100; i++) {
             int score = 75 + random.nextInt(21); // 75 to 95
             
-            ExplorationTarget.Priority priority = score > 90 ? ExplorationTarget.Priority.VERY_HIGH :
-                    score > 85 ? ExplorationTarget.Priority.HIGH :
-                            score > 80 ? ExplorationTarget.Priority.MEDIUM : ExplorationTarget.Priority.LOW;
+            ExplorationTarget.Priority priority = score >= 80 ? ExplorationTarget.Priority.VERY_HIGH :
+                    score >= 60 ? ExplorationTarget.Priority.HIGH :
+                            score >= 35 ? ExplorationTarget.Priority.MEDIUM : ExplorationTarget.Priority.LOW;
             
             ExplorationTarget.FieldStatus status = ExplorationTarget.FieldStatus.PENDING;
             if (i % 5 == 0) status = ExplorationTarget.FieldStatus.CONFIRMED;
@@ -127,9 +127,9 @@ public class DemoDataSeeder {
                         t.setFeatureContributionsJson(p.featureContributionsJson());
                         t.setExplanationText(p.explanationText());
                         t.setMlScored(true);
-                        ExplorationTarget.Priority priority = p.prospectivityScore() > 90 ? ExplorationTarget.Priority.VERY_HIGH :
-                            p.prospectivityScore() > 85 ? ExplorationTarget.Priority.HIGH :
-                            p.prospectivityScore() > 80 ? ExplorationTarget.Priority.MEDIUM : ExplorationTarget.Priority.LOW;
+                        ExplorationTarget.Priority priority = p.prospectivityScore() >= 80 ? ExplorationTarget.Priority.VERY_HIGH :
+                            p.prospectivityScore() >= 60 ? ExplorationTarget.Priority.HIGH :
+                            p.prospectivityScore() >= 35 ? ExplorationTarget.Priority.MEDIUM : ExplorationTarget.Priority.LOW;
                         t.setPriority(priority);
                     }
                 }

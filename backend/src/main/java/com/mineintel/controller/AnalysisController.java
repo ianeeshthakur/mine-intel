@@ -52,9 +52,9 @@ public class AnalysisController {
                         t.setMlScored(true);
                         
                         // Update priority based on the new ML score
-                        ExplorationTarget.Priority priority = p.prospectivityScore() > 90 ? ExplorationTarget.Priority.VERY_HIGH :
-                            p.prospectivityScore() > 85 ? ExplorationTarget.Priority.HIGH :
-                            p.prospectivityScore() > 80 ? ExplorationTarget.Priority.MEDIUM : ExplorationTarget.Priority.LOW;
+                        ExplorationTarget.Priority priority = p.prospectivityScore() >= 80 ? ExplorationTarget.Priority.VERY_HIGH :
+                            p.prospectivityScore() >= 60 ? ExplorationTarget.Priority.HIGH :
+                            p.prospectivityScore() >= 35 ? ExplorationTarget.Priority.MEDIUM : ExplorationTarget.Priority.LOW;
                         t.setPriority(priority);
                     }
                 }
