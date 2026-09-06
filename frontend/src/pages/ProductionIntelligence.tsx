@@ -5,7 +5,8 @@ export default function ProductionIntelligence() {
   const [forecast, setForecast] = useState<any | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/production/forecast')
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    fetch(`${API_BASE}/api/production/forecast`)
       .then(res => res.json())
       .then(data => setForecast(data))
       .catch(console.error);

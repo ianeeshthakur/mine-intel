@@ -12,7 +12,8 @@ export default function FieldVerification() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/targets/by-target-id/${targetId}`)
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    fetch(`${API_BASE}/api/targets/by-target-id/${targetId}`)
       .then(res => res.json())
       .then(data => {
         setTargetData(data);
@@ -23,7 +24,8 @@ export default function FieldVerification() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetch(`http://localhost:8080/api/targets/${targetData?.id}/verify`, {
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    fetch(`${API_BASE}/api/targets/${targetData?.id}/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status, notes })

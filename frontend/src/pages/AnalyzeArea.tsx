@@ -20,7 +20,8 @@ export default function AnalyzeArea() {
 
   useEffect(() => {
     // Fire the ML scoring in the background as soon as the page loads
-    fetch('http://localhost:8080/api/analysis/run', { method: 'POST' })
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    fetch(`${API_BASE}/api/analysis/run`, { method: 'POST' })
       .then(res => res.json())
       .then(data => {
         console.log('ML analysis complete:', data);

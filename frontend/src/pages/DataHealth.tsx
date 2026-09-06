@@ -5,7 +5,8 @@ export default function DataHealth() {
   const [metrics, setMetrics] = useState<any>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/analysis/model-metrics')
+    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+    fetch(`${API_BASE}/api/analysis/model-metrics`)
       .then(res => res.json())
       .then(data => {
         if (!data.error) setMetrics(data);
