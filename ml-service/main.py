@@ -21,9 +21,12 @@ from typing import List, Optional
 import numpy as np
 import shap
 import uvicorn
+import csv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+from train_model import run_training_pipeline, DATA_PATH
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 BASE       = Path(__file__).parent
@@ -85,6 +88,16 @@ class CellFeatures(BaseModel):
     terrain_score:              float = Field(..., ge=0, le=1)
     data_quality:               float = Field(..., ge=0, le=1)
     cell_id:                    Optional[str] = None
+
+class FeedbackData(BaseModel):
+    satellite_spectral_anomaly: float
+    lithology_compatibility: float
+    structural_proximity: float
+    mineralization_proximity: float
+    soil_support_score: float
+    terrain_score: float
+    data_quality: float
+    label: int
 
 
 class FeatureContribution(BaseModel):
@@ -190,6 +203,32 @@ def predict(cell: CellFeatures):
 @app.post("/predict/batch", response_model=List[PredictionResult])
 def predict_batch(request: BatchRequest):
     return [_predict_one(cell) for cell in request.cells]
+
+
+@app.post("/feedback")
+def add_feedback(data: FeedbackData):
+    with open(DATA_PATH, "a", newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            "FB-MANUAL", "A", 0.0, 0.0,
+            data.satellite_spectral_anomaly,
+            data.lithology_compatibility,
+            data.structural_proximity,
+            data.mineralization_proximity,
+            data.soil_support_score,
+            data.terrain_score,
+            data.data_quality,
+            data.label,
+            0.5
+        ])
+    return {"status": "Feedback saved"}
+
+
+@app.post("/retrain")
+def retrain_model():
+    metadata = run_training_pipeline()
+    load_model()
+    return {"status": "Retrained", "metrics": metadata["metrics"]}
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import com.mineintel.model.ExplorationTarget;
 import com.mineintel.model.FieldVerification;
 import com.mineintel.repository.ExplorationTargetRepository;
 import com.mineintel.repository.FieldVerificationRepository;
+import com.mineintel.service.MlFeedbackService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ public class TargetController {
 
     private final ExplorationTargetRepository repository;
     private final FieldVerificationRepository fieldVerificationRepository;
+    private final MlFeedbackService mlFeedbackService;
 
     @GetMapping
     public List<ExplorationTarget> getAllTargets() {
@@ -57,6 +59,9 @@ public class TargetController {
                 .verifiedAt(LocalDateTime.now())
                 .build();
             fieldVerificationRepository.save(verification);
+            
+            // Trigger ML Active Learning Loop
+            mlFeedbackService.sendFeedbackAndRetrain(target);
             
             return ResponseEntity.ok(target);
         }).orElse(ResponseEntity.notFound().build());
