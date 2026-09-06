@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Database, CheckCircle2, AlertCircle, XCircle, BrainCircuit, HardDrive, Activity, Server, Terminal, Clock } from 'lucide-react';
 
 export default function DataHealth() {
