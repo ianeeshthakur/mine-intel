@@ -106,11 +106,11 @@ export default function ProspectivityExplorer() {
       {/* Main Map Area */}
       <div className="flex-1 relative" style={{ zIndex: 0 }}>
         <MapContainer center={[21.8, 80.2]} zoom={11} style={{ height: '100%', width: '100%' }}>
-          {/* BASEMAP — CartoDB Positron, no API key */}
+          {/* BASEMAP — OpenStreetMap standard tiles (free, no API key) */}
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
-            subdomains="abcd"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            subdomains={["a", "b", "c"]}
             maxZoom={19}
           />
 

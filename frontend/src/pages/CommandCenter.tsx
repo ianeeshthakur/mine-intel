@@ -137,11 +137,11 @@ export default function CommandCenter() {
               style={{ height: '100%', width: '100%' }}
               zoomControl={true}
             >
-              {/* BASEMAP — CartoDB Positron, no API key required */}
+              {/* BASEMAP — OpenStreetMap standard tiles (free, no API key) */}
               <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>'
-                subdomains="abcd"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                subdomains={["a", "b", "c"]}
                 maxZoom={19}
               />
 
