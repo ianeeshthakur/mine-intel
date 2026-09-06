@@ -46,6 +46,17 @@ public class DemoDataSeeder {
             if (i % 5 == 0) status = ExplorationTarget.FieldStatus.CONFIRMED;
             if (i % 7 == 0) status = ExplorationTarget.FieldStatus.NOT_CONFIRMED;
 
+            // ── Generate realistic ML feature vectors ──────────────────────
+            // Features are correlated with score to ensure ML output is consistent
+            double scoreFraction = (score - 75.0) / 25.0; // 0-1 across score range
+            double fLithology      = 0.4 + scoreFraction * 0.4 + (random.nextDouble() - 0.5) * 0.15;
+            double fMineralization = 0.3 + scoreFraction * 0.45 + (random.nextDouble() - 0.5) * 0.15;
+            double fStructural     = 0.35 + scoreFraction * 0.4 + (random.nextDouble() - 0.5) * 0.20;
+            double fSatellite      = 0.3 + scoreFraction * 0.35 + (random.nextDouble() - 0.5) * 0.20;
+            double fSoil           = 0.4 + random.nextDouble() * 0.4;
+            double fTerrain        = 0.45 + random.nextDouble() * 0.35;
+            double fDataQuality    = 0.6 + random.nextDouble() * 0.4;
+
             ExplorationTarget target = ExplorationTarget.builder()
                     .targetId(String.format("T-%03d", i))
                     .latitude(baseLat + (random.nextDouble() - 0.5) * 0.5)
@@ -56,6 +67,15 @@ public class DemoDataSeeder {
                     .mainEvidence("Spectral + Lithology")
                     .counterEvidenceSummary("Surface cover")
                     .zoneName("Zone " + (char)('A' + random.nextInt(5)))
+                    // ML feature vector (used by AnalysisController)
+                    .featureSatellite(clamp(fSatellite))
+                    .featureLithology(clamp(fLithology))
+                    .featureStructural(clamp(fStructural))
+                    .featureMineralization(clamp(fMineralization))
+                    .featureSoil(clamp(fSoil))
+                    .featureTerrain(clamp(fTerrain))
+                    .featureDataQuality(clamp(fDataQuality))
+                    .mlScored(false)
                     .build();
 
             // Add evidences
@@ -99,5 +119,9 @@ public class DemoDataSeeder {
                 ))
                 .build();
         productionRepository.save(forecast);
+    }
+
+    private double clamp(double v) {
+        return Math.max(0.0, Math.min(1.0, v));
     }
 }

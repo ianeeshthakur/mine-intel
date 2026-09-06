@@ -16,16 +16,32 @@ export default function AnalyzeArea() {
   const [currentStage, setCurrentStage] = useState(0);
   const [complete, setComplete] = useState(false);
 
+  const [apiDone, setApiDone] = useState(false);
+
+  useEffect(() => {
+    // Fire the ML scoring in the background as soon as the page loads
+    fetch('http://localhost:8080/api/analysis/run', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        console.log('ML analysis complete:', data);
+        setApiDone(true);
+      })
+      .catch(err => {
+        console.error('ML analysis failed:', err);
+        setApiDone(true); // Still proceed so demo doesn't get stuck
+      });
+  }, []);
+
   useEffect(() => {
     if (currentStage < stages.length) {
       const timer = setTimeout(() => {
         setCurrentStage(prev => prev + 1);
-      }, 1200); // 1.2s per stage for a dramatic but fast demo effect
+      }, 1200); // 1.2s per stage
       return () => clearTimeout(timer);
-    } else {
+    } else if (apiDone) {
       setTimeout(() => setComplete(true), 500);
     }
-  }, [currentStage]);
+  }, [currentStage, apiDone]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] bg-slate-50 p-8">

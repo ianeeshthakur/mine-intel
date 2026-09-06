@@ -43,22 +43,51 @@ export default function TargetIntelligencePanel({ target }: { target: any }) {
       <div>
         <h3 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
           <BookOpen className="w-5 h-5 text-blue-600" />
-          Why did AI prioritize this location?
+          AI-Generated Explanation (model feature importance)
         </h3>
-        <div className="space-y-3">
-          {target.evidences?.map((ev: any, idx: number) => (
-            <div key={idx} className="border-l-2 border-blue-400 pl-3">
-              <div className="flex justify-between items-baseline mb-0.5">
-                <span className="text-sm font-semibold text-slate-800">{String(idx + 1).padStart(2, '0')} — {ev.category}</span>
-                <span className="text-xs font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">{ev.strength}</span>
-              </div>
-              <p className="text-sm text-slate-600">{ev.description}</p>
+        
+        {target.mlScored && target.featureContributionsJson ? (
+          <>
+            <div className="space-y-3">
+              {JSON.parse(target.featureContributionsJson).slice(0, 4).map((c: any, idx: number) => (
+                <div key={idx} className="border-l-2 border-blue-400 pl-3">
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <span className="text-sm font-semibold text-slate-800">{String(idx + 1).padStart(2, '0')} — {c.label}</span>
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${c.shap_value >= 0 ? 'text-blue-700 bg-blue-50' : 'text-amber-700 bg-amber-50'}`}>
+                      {c.contribution_pct.toFixed(1)}% weight
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1.5">
+                    <div 
+                      className={`h-1.5 rounded-full ${c.shap_value >= 0 ? 'bg-blue-500' : 'bg-amber-400'}`} 
+                      style={{ width: `${Math.min(100, c.contribution_pct * 2)}%` }} 
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="mt-4 p-3 bg-blue-50 text-blue-800 text-sm font-medium rounded border border-blue-100">
-          <strong>Overall Interpretation:</strong> Multiple independent evidence layers strongly support further investigation.
-        </div>
+            {target.explanationText && (
+              <div className="mt-4 p-3 bg-blue-50 text-blue-800 text-sm rounded border border-blue-100 leading-relaxed">
+                {target.explanationText}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="space-y-3">
+            {target.evidences?.map((ev: any, idx: number) => (
+              <div key={idx} className="border-l-2 border-slate-300 pl-3">
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <span className="text-sm font-semibold text-slate-800">{String(idx + 1).padStart(2, '0')} — {ev.category}</span>
+                  <span className="text-xs font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{ev.strength}</span>
+                </div>
+                <p className="text-sm text-slate-600">{ev.description}</p>
+              </div>
+            ))}
+            <div className="mt-4 p-3 bg-slate-50 text-slate-600 text-sm font-medium rounded border border-slate-200">
+              Run Regional AI Analysis to generate ML explanation.
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Counter-Evidence (Why it might be wrong) */}

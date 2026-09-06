@@ -1,0 +1,44 @@
+{
+  "features": [
+    "satellite_spectral_anomaly",
+    "lithology_compatibility",
+    "structural_proximity",
+    "mineralization_proximity",
+    "soil_support_score",
+    "terrain_score",
+    "data_quality"
+  ],
+  "n_estimators": 200,
+  "spatial_split": true,
+  "train_zones": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F"
+  ],
+  "test_zones": [
+    "G",
+    "H"
+  ],
+  "train_size": 7468,
+  "test_size": 2532,
+  "metrics": {
+    "accuracy": 0.9159,
+    "precision": 0.2531,
+    "recall": 0.3083,
+    "f1": 0.278,
+    "roc_auc": 0.7974
+  },
+  "feature_importances": {
+    "satellite_spectral_anomaly": 0.3769,
+    "soil_support_score": 0.1702,
+    "mineralization_proximity": 0.1043,
+    "lithology_compatibility": 0.0952,
+    "structural_proximity": 0.0938,
+    "terrain_score": 0.0846,
+    "data_quality": 0.075
+  },
+  "data_note": "DEMO METRICS \u2014 trained on 10,000 synthetic cells (Balaghat simulation)"
+}
