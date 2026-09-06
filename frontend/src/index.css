@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+.leaflet-tooltip.cluster-boundary-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
 @theme {
   --color-primary: #1d4ed8;
   --color-primary-light: #3b82f6;
