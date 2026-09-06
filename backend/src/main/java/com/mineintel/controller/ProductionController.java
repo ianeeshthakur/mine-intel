@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/production")
-@CrossOrigin(origins = {"http://localhost:5173", "https://frontend-one-red-33.vercel.app"})
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class ProductionController {
 

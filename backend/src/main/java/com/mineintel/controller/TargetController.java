@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/targets")
-@CrossOrigin(origins = {"http://localhost:5173", "https://frontend-one-red-33.vercel.app"}) // Allow frontend to call backend
+@CrossOrigin(origins = "*") // Allow frontend to call backend
 @RequiredArgsConstructor
 public class TargetController {
 

@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/assistant")
-@CrossOrigin(origins = {"http://localhost:5173", "https://frontend-one-red-33.vercel.app"})
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @Slf4j
 public class AssistantController {
