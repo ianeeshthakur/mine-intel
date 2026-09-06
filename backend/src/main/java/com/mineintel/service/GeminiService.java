@@ -71,35 +71,57 @@ public class GeminiService {
 
             String url = GEMINI_API_URL + "?key=" + apiKey;
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> response = restTemplate.postForObject(url, requestBody, Map.class);
-
-            if (response == null) {
-                return "No response from AI service.";
-            }
-
-            // Extract text from Gemini response
-            @SuppressWarnings("unchecked")
-            List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
-            if (candidates != null && !candidates.isEmpty()) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
-                if (content != null) {
+            int maxRetries = 3;
+            int retryDelayMs = 1000;
+            
+            for (int attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
                     @SuppressWarnings("unchecked")
-                    List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
-                    if (parts != null && !parts.isEmpty()) {
-                        return (String) parts.get(0).get("text");
+                    Map<String, Object> response = restTemplate.postForObject(url, requestBody, Map.class);
+
+                    if (response == null) {
+                        return "No response from AI service.";
+                    }
+
+                    // Extract text from Gemini response
+                    @SuppressWarnings("unchecked")
+                    List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+                    if (candidates != null && !candidates.isEmpty()) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+                        if (content != null) {
+                            @SuppressWarnings("unchecked")
+                            List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+                            if (parts != null && !parts.isEmpty()) {
+                                return (String) parts.get(0).get("text");
+                            }
+                        }
+                    }
+                    return "I wasn't able to generate a response. Please try again.";
+                    
+                } catch (Exception e) {
+                    if (e.getMessage() != null && e.getMessage().contains("429")) {
+                        if (attempt == maxRetries) {
+                            log.error("Gemini API rate limit exceeded after {} attempts", maxRetries);
+                            return "I'm receiving too many requests right now. Please wait a few seconds and try asking me again.";
+                        }
+                        log.warn("Rate limit hit (429). Retrying attempt {}/{} in {}ms...", attempt, maxRetries, retryDelayMs);
+                        try {
+                            Thread.sleep(retryDelayMs);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                        }
+                        retryDelayMs *= 2; // Exponential backoff
+                    } else {
+                        log.error("Gemini API call failed: {}", e.getMessage());
+                        return "AI Assistant encountered an error: Please try again later.";
                     }
                 }
             }
-
             return "I wasn't able to generate a response. Please try again.";
 
         } catch (Exception e) {
-            log.error("Gemini API call failed: {}", e.getMessage());
-            if (e.getMessage().contains("429")) {
-                return "I'm receiving too many requests right now. Please wait a few seconds and try asking me again.";
-            }
+            log.error("Failed to build Gemini request: {}", e.getMessage());
             return "AI Assistant encountered an error: Please try again later.";
         }
     }
