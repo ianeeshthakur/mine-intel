@@ -21,25 +21,50 @@ const BALAGHAT_BOUNDARY: [number, number][] = [
   [22.05, 79.95],
 ];
 
-// Custom DivIcon for clusters — colored circle with white count
+// Custom DivIcon for clusters — neutral slate color, rounded square with targets label
 function createClusterIcon(cluster: any) {
   const count = cluster.getChildCount();
-  // Estimate avg score: color the cluster by density
-  const color = count > 15 ? '#dc2626' : count > 8 ? '#f97316' : '#facc15';
-  const size = count > 15 ? 44 : count > 8 ? 38 : 32;
+  const children = cluster.getAllChildMarkers();
+  
+  let minScore = 100;
+  let maxScore = 0;
+  let sumScore = 0;
+  let validCount = 0;
+
+  children.forEach((marker: any) => {
+    const target = marker.options.targetData;
+    if (target && typeof target.prospectivityScore === 'number') {
+      const score = target.prospectivityScore;
+      if (score < minScore) minScore = score;
+      if (score > maxScore) maxScore = score;
+      sumScore += score;
+      validCount++;
+    }
+  });
+
+  const avgScore = validCount > 0 ? Math.round(sumScore / validCount) : 0;
+  const rangeText = validCount > 0 ? `Score range: ${minScore}–${maxScore}` : 'Scores unavailable';
+  const tooltipText = `${count} targets\n${rangeText}\nAvg score: ${avgScore}`;
+
+  const color = '#334155'; // slate-700
+  const size = count > 15 ? 46 : count > 8 ? 42 : 38;
 
   return L.divIcon({
     html: `
-      <div style="
+      <div 
+        title="${tooltipText}"
+        style="
         width: ${size}px; height: ${size}px;
         background: ${color};
-        border: 3px solid white;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-        display: flex; align-items: center; justify-content: center;
-        color: white; font-weight: 700; font-size: ${count > 9 ? 13 : 14}px;
-        font-family: system-ui, sans-serif;
-      ">${count}</div>`,
+        border: 2px solid white;
+        border-radius: 8px; /* Distinct shape from score circles */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        color: white; font-family: system-ui, sans-serif;
+      ">
+        <span style="font-weight: 700; font-size: ${count > 9 ? 12 : 14}px; line-height: 1;">${count}</span>
+        <span style="font-weight: 500; font-size: 8px; line-height: 1; opacity: 0.8; margin-top: 1px;">targets</span>
+      </div>`,
     className: '',
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -105,100 +130,154 @@ export default function CommandCenter() {
           <MetricCard title="Model Status" value="Ready" status="success" icon={<ServerStatus />} />
         </div>
 
-        {/* Map Card — premium framing */}
-        <div
-          className="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden flex flex-col"
-          style={{ height: '500px' }}
-        >
-          {/* Card header */}
-          <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-white flex-shrink-0">
-            <div>
-              <h3 className="font-semibold text-slate-800">Regional Overview: Prospectivity Map</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Balaghat, MP · 1,000 km² · Simulated AI prospectivity</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-red-500" />
-                AI Prospectivity + Clustered Targets
+        {/* Map and Top Targets Layout */}
+        <div className="flex gap-6 h-[520px]">
+          {/* Map Card */}
+          <div className="flex-1 bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden flex flex-col">
+            {/* Card header */}
+            <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-white flex-shrink-0">
+              <div>
+                <h3 className="font-semibold text-slate-800">Regional Overview: Prospectivity Map</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Balaghat, MP · 1,000 km² · Simulated AI prospectivity</p>
               </div>
-              <button
-                onClick={() => navigate('/explorer')}
-                className="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-md transition-colors"
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-md text-xs font-medium text-slate-600 shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-slate-700" />
+                  Target Clusters
+                </div>
+                <button
+                  onClick={() => navigate('/explorer')}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-100 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  Full Explorer →
+                </button>
+              </div>
+            </div>
+
+            {/* Map container */}
+            <div className="flex-1 relative" style={{ zIndex: 0 }}>
+              <MapContainer
+                center={[21.8, 80.2]}
+                zoom={10}
+                style={{ height: '100%', width: '100%' }}
+                zoomControl={true}
               >
-                Full Explorer →
-              </button>
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  subdomains={["a", "b", "c"]}
+                  maxZoom={19}
+                />
+
+                <Polygon
+                  positions={BALAGHAT_BOUNDARY}
+                  pathOptions={{
+                    color: '#3b82f6',
+                    weight: 2,
+                    dashArray: '8 6',
+                    fillOpacity: 0.04,
+                    fillColor: '#3b82f6',
+                  }}
+                />
+
+                <HeatmapLayer
+                  points={targets.map(t => [t.latitude, t.longitude, t.prospectivityScore / 100.0])}
+                />
+
+                <MarkerClusterGroup iconCreateFunction={createClusterIcon} maxClusterRadius={60}>
+                  {targets.map(target => (
+                    <CircleMarker
+                      key={target.id}
+                      center={[target.latitude, target.longitude]}
+                      radius={target.prospectivityScore > 90 ? 8 : 6}
+                      // @ts-ignore
+                      targetData={target}
+                      pathOptions={{
+                        color: '#ffffff',
+                        weight: 2,
+                        fillColor: target.prospectivityScore > 90 ? '#dc2626' : '#f97316',
+                        fillOpacity: 0.9,
+                      }}
+                    >
+                      <Popup>
+                        <div className="font-sans min-w-[140px]">
+                          <div className="font-bold text-slate-900 text-base">{target.targetId}</div>
+                          <div className="text-sm text-slate-600 mt-0.5">
+                            Prospectivity: <span className="font-semibold text-orange-600">{target.prospectivityScore}/100</span>
+                          </div>
+                          <div className="text-xs text-slate-400 mb-2">{target.priority.replace('_', ' ')}</div>
+                          <button
+                            onClick={() => navigate(`/explorer?target=${target.targetId}`)}
+                            className="w-full text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 py-1.5 px-2 rounded transition-colors"
+                          >
+                            Investigate Target →
+                          </button>
+                        </div>
+                      </Popup>
+                    </CircleMarker>
+                  ))}
+                </MarkerClusterGroup>
+              </MapContainer>
+
+              <ProspectivityLegend />
             </div>
           </div>
 
-          {/* Map container — relative so the legend can be positioned inside */}
-          <div className="flex-1 relative" style={{ zIndex: 0 }}>
-            <MapContainer
-              center={[21.8, 80.2]}
-              zoom={10}
-              style={{ height: '100%', width: '100%' }}
-              zoomControl={true}
-            >
-              {/* BASEMAP — OpenStreetMap standard tiles (free, no API key) */}
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                subdomains={["a", "b", "c"]}
-                maxZoom={19}
-              />
+          {/* Top Targets Panel */}
+          <div className="w-[380px] bg-white border border-slate-200 rounded-xl shadow-md flex flex-col overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50 flex items-center gap-2 flex-shrink-0">
+              <Target className="w-5 h-5 text-slate-600" />
+              <h3 className="font-bold text-slate-800">Top Priority Targets</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2">
+              {targets.slice(0, 8).map((target, idx) => {
+                let topFeature = "Multiple factors";
+                if (target.mlScored && target.featureContributionsJson) {
+                  try {
+                    const shap = JSON.parse(target.featureContributionsJson);
+                    if (shap && shap.length > 0) {
+                      topFeature = shap[0].label;
+                    }
+                  } catch (e) {}
+                }
 
-              {/* Exploration boundary dashed outline */}
-              <Polygon
-                positions={BALAGHAT_BOUNDARY}
-                pathOptions={{
-                  color: '#3b82f6',
-                  weight: 2,
-                  dashArray: '8 6',
-                  fillOpacity: 0.04,
-                  fillColor: '#3b82f6',
-                }}
-              />
-
-              {/* Prospectivity heatmap */}
-              <HeatmapLayer
-                points={targets.map(t => [t.latitude, t.longitude, t.prospectivityScore / 100.0])}
-              />
-
-              {/* Clustered priority targets with custom icons */}
-              <MarkerClusterGroup iconCreateFunction={createClusterIcon} maxClusterRadius={60}>
-                {targets.map(target => (
-                  <CircleMarker
-                    key={target.id}
-                    center={[target.latitude, target.longitude]}
-                    radius={target.prospectivityScore > 90 ? 8 : 6}
-                    pathOptions={{
-                      color: '#ffffff',
-                      weight: 2,
-                      fillColor: target.prospectivityScore > 90 ? '#dc2626' : '#f97316',
-                      fillOpacity: 0.9,
-                    }}
+                return (
+                  <button
+                    key={target.targetId}
+                    onClick={() => navigate(`/explorer?target=${target.targetId}`)}
+                    className="w-full text-left p-3 hover:bg-slate-50 border-b border-slate-100 last:border-0 flex flex-col gap-1.5 transition-colors"
                   >
-                    <Popup>
-                      <div className="font-sans min-w-[140px]">
-                        <div className="font-bold text-slate-900 text-base">{target.targetId}</div>
-                        <div className="text-sm text-slate-600 mt-0.5">
-                          Prospectivity: <span className="font-semibold text-orange-600">{target.prospectivityScore}/100</span>
-                        </div>
-                        <div className="text-xs text-slate-400 mb-2">{target.priority.replace('_', ' ')}</div>
-                        <button
-                          onClick={() => navigate(`/explorer?target=${target.targetId}`)}
-                          className="w-full text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 py-1.5 px-2 rounded transition-colors"
-                        >
-                          Investigate Target →
-                        </button>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-800">{idx + 1}. {target.targetId}</span>
+                        <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${
+                          target.priority === 'VERY_HIGH' ? 'bg-red-100 text-red-700' :
+                          target.priority === 'HIGH' ? 'bg-orange-100 text-orange-700' :
+                          target.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-slate-100 text-slate-700'
+                        }`}>
+                          {target.priority.replace('_', ' ')}
+                        </span>
                       </div>
-                    </Popup>
-                  </CircleMarker>
-                ))}
-              </MarkerClusterGroup>
-            </MapContainer>
-
-            {/* Floating legend inside the map card */}
-            <ProspectivityLegend />
+                      <div className="flex items-baseline gap-0.5">
+                        <span className={`text-lg font-bold ${
+                          target.prospectivityScore > 90 ? 'text-red-600' :
+                          target.prospectivityScore > 80 ? 'text-orange-600' : 'text-slate-700'
+                        }`}>
+                          {target.prospectivityScore}
+                        </span>
+                        <span className="text-xs text-slate-400">/100</span>
+                      </div>
+                    </div>
+                    {target.mlScored && (
+                      <div className="text-xs text-slate-500 truncate">
+                        <span className="font-semibold text-slate-600">Top factor:</span> {topFeature}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
