@@ -115,9 +115,11 @@ def _predict_one(cell: CellFeatures) -> PredictionResult:
 
     # SHAP values — shape (1, n_features) for positive class
     shap_vals = _explainer.shap_values(x)
-    # For RandomForest binary: shap_values returns list [neg_class, pos_class]
+    # For RandomForest binary: shap_values might be list of arrays or a single 3D array (n_samples, n_features, n_classes)
     if isinstance(shap_vals, list):
         sv = shap_vals[1][0]
+    elif isinstance(shap_vals, np.ndarray) and len(shap_vals.shape) == 3:
+        sv = shap_vals[0, :, 1]
     else:
         sv = shap_vals[0]
 
