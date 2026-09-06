@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { MessageCircle, X, Send, Sparkles, Bot, User, Loader2 } from 'lucide-react';
+import { X, Send, Sparkles, Bot, User, Loader2 } from 'lucide-react';
 
 interface ChatMessage {
   role: 'user' | 'assistant';

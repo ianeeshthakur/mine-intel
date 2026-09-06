@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { FileText, Download, TrendingUp, Calculator, BarChart3, AlertTriangle, Target, Shield, Clock } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { FileText, Download, Calculator, BarChart3, AlertTriangle, Target, Shield, Clock } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
