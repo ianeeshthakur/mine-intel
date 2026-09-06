@@ -17,6 +17,7 @@ public class DemoDataSeeder {
 
     private final ExplorationTargetRepository targetRepository;
     private final ProductionForecastRepository productionRepository;
+    private final MlClientService mlClientService;
 
     @PostConstruct
     public void seed() {
@@ -29,7 +30,7 @@ public class DemoDataSeeder {
     }
 
     private void seedTargets() {
-        Random random = new Random();
+        Random random = new Random(42);
         // Balaghat approx center: 21.8, 80.2
         double baseLat = 21.8;
         double baseLng = 80.2;
@@ -99,6 +100,42 @@ public class DemoDataSeeder {
             targets.add(target);
         }
         targetRepository.saveAll(targets);
+        autoScoreWithMl(targets);
+    }
+
+    private void autoScoreWithMl(List<ExplorationTarget> targets) {
+        if (mlClientService != null && mlClientService.isHealthy()) {
+            List<MlClientService.CellFeatureVector> features = targets.stream()
+                .map(t -> new MlClientService.CellFeatureVector(
+                    t.getTargetId(),
+                    t.getFeatureSatellite(),
+                    t.getFeatureLithology(),
+                    t.getFeatureStructural(),
+                    t.getFeatureMineralization(),
+                    t.getFeatureSoil(),
+                    t.getFeatureTerrain(),
+                    t.getFeatureDataQuality()
+                )).toList();
+
+            List<MlClientService.MlPrediction> predictions = mlClientService.predictBatch(features);
+            if (predictions != null && predictions.size() == targets.size()) {
+                for (int i = 0; i < targets.size(); i++) {
+                    ExplorationTarget t = targets.get(i);
+                    MlClientService.MlPrediction p = predictions.get(i);
+                    if (p != null) {
+                        t.setProspectivityScore(p.prospectivityScore());
+                        t.setFeatureContributionsJson(p.featureContributionsJson());
+                        t.setExplanationText(p.explanationText());
+                        t.setMlScored(true);
+                        ExplorationTarget.Priority priority = p.prospectivityScore() > 90 ? ExplorationTarget.Priority.VERY_HIGH :
+                            p.prospectivityScore() > 85 ? ExplorationTarget.Priority.HIGH :
+                            p.prospectivityScore() > 80 ? ExplorationTarget.Priority.MEDIUM : ExplorationTarget.Priority.LOW;
+                        t.setPriority(priority);
+                    }
+                }
+                targetRepository.saveAll(targets);
+            }
+        }
     }
 
     private void seedProduction() {
