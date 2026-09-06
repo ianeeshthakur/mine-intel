@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Play, RotateCcw, Map as MapIcon, Target, CheckCircle, Activity, Info } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker, Polygon, Popup } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 import HeatmapLayer from '../components/HeatmapLayer';
 import ProspectivityLegend from '../components/ProspectivityLegend';
+import { createProspectivityClusterIcon } from '../components/createProspectivityClusterIcon';
 
 // Approximate Balaghat exploration boundary polygon (covering ~1,000 km²)
 const BALAGHAT_BOUNDARY: [number, number][] = [
@@ -20,56 +20,6 @@ const BALAGHAT_BOUNDARY: [number, number][] = [
   [21.80, 79.88],
   [22.05, 79.95],
 ];
-
-// Custom DivIcon for clusters — neutral slate color, rounded square with targets label
-function createClusterIcon(cluster: any) {
-  const count = cluster.getChildCount();
-  const children = cluster.getAllChildMarkers();
-  
-  let minScore = 100;
-  let maxScore = 0;
-  let sumScore = 0;
-  let validCount = 0;
-
-  children.forEach((marker: any) => {
-    const target = marker.options.targetData;
-    if (target && typeof target.prospectivityScore === 'number') {
-      const score = target.prospectivityScore;
-      if (score < minScore) minScore = score;
-      if (score > maxScore) maxScore = score;
-      sumScore += score;
-      validCount++;
-    }
-  });
-
-  const avgScore = validCount > 0 ? Math.round(sumScore / validCount) : 0;
-  const rangeText = validCount > 0 ? `Score range: ${minScore}–${maxScore}` : 'Scores unavailable';
-  const tooltipText = `${count} targets\n${rangeText}\nAvg score: ${avgScore}`;
-
-  const color = '#334155'; // slate-700
-  const size = count > 15 ? 46 : count > 8 ? 42 : 38;
-
-  return L.divIcon({
-    html: `
-      <div 
-        title="${tooltipText}"
-        style="
-        width: ${size}px; height: ${size}px;
-        background: ${color};
-        border: 2px solid white;
-        border-radius: 8px; /* Distinct shape from score circles */
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        color: white; font-family: system-ui, sans-serif;
-      ">
-        <span style="font-weight: 700; font-size: ${count > 9 ? 12 : 14}px; line-height: 1;">${count}</span>
-        <span style="font-weight: 500; font-size: 8px; line-height: 1; opacity: 0.8; margin-top: 1px;">targets</span>
-      </div>`,
-    className: '',
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-}
 
 export default function CommandCenter() {
   const navigate = useNavigate();
@@ -184,7 +134,7 @@ export default function CommandCenter() {
                   points={targets.map(t => [t.latitude, t.longitude, t.prospectivityScore / 100.0])}
                 />
 
-                <MarkerClusterGroup iconCreateFunction={createClusterIcon} maxClusterRadius={60}>
+                <MarkerClusterGroup iconCreateFunction={createProspectivityClusterIcon} maxClusterRadius={60}>
                   {targets.map(target => (
                     <CircleMarker
                       key={target.id}

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Polygon, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
-import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
@@ -10,31 +9,13 @@ import { Layers, X } from 'lucide-react';
 import HeatmapLayer from '../components/HeatmapLayer';
 import ProspectivityLegend from '../components/ProspectivityLegend';
 import TargetIntelligencePanel from '../components/intelligence/TargetIntelligencePanel';
+import { createProspectivityClusterIcon } from '../components/createProspectivityClusterIcon';
 
 // Approximate Balaghat exploration boundary
 const BALAGHAT_BOUNDARY: [number, number][] = [
   [22.05, 79.95], [22.05, 80.45], [21.65, 80.48],
   [21.55, 80.20], [21.60, 79.92], [21.80, 79.88], [22.05, 79.95],
 ];
-
-// Custom cluster icon matching Command Center
-function createClusterIcon(cluster: any) {
-  const count = cluster.getChildCount();
-  const color = count > 15 ? '#dc2626' : count > 8 ? '#f97316' : '#facc15';
-  const size = count > 15 ? 44 : count > 8 ? 38 : 32;
-  return L.divIcon({
-    html: `<div style="
-      width:${size}px; height:${size}px; background:${color};
-      border:3px solid white; border-radius:50%;
-      box-shadow:0 2px 8px rgba(0,0,0,0.25);
-      display:flex; align-items:center; justify-content:center;
-      color:white; font-weight:700; font-size:${count>9?13:14}px;
-      font-family:system-ui,sans-serif;">${count}</div>`,
-    className: '',
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-}
 
 export default function ProspectivityExplorer() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -138,12 +119,14 @@ export default function ProspectivityExplorer() {
 
           {/* Clustered priority targets — independent of heatmap */}
           {layers.priorityTargets && (
-            <MarkerClusterGroup iconCreateFunction={createClusterIcon} maxClusterRadius={60}>
+            <MarkerClusterGroup iconCreateFunction={createProspectivityClusterIcon} maxClusterRadius={60}>
               {targets.map(target => (
                 <CircleMarker
                   key={target.id}
                   center={[target.latitude, target.longitude]}
                   radius={selectedTargetId === target.targetId ? 12 : (target.prospectivityScore > 90 ? 8 : 6)}
+                  // @ts-ignore — custom prop consumed by createProspectivityClusterIcon
+                  targetData={target}
                   eventHandlers={{
                     click: () => {
                       setSelectedTargetData(target);

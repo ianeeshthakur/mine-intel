@@ -24,7 +24,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MlClientService {
 
-    private static final String ML_BASE_URL = "http://localhost:8000";
+    private final String ML_BASE_URL = System.getenv("ML_SERVICE_URL") != null ? 
+                                       System.getenv("ML_SERVICE_URL") : "http://localhost:8000";
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
 

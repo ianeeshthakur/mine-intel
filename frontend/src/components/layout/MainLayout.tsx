@@ -1,5 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { Map, Compass, HardHat, Server, Activity, ArrowRight } from 'lucide-react';
+import ChatWidget from '../ChatWidget';
 
 export default function MainLayout() {
   const navItems = [
@@ -53,7 +54,9 @@ export default function MainLayout() {
         <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
+        <ChatWidget />
       </div>
     </div>
   );
 }
+
