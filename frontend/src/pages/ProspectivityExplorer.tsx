@@ -11,6 +11,7 @@ import ProspectivityLegend from '../components/ProspectivityLegend';
 import TargetIntelligencePanel from '../components/intelligence/TargetIntelligencePanel';
 import { createProspectivityClusterIcon } from '../components/createProspectivityClusterIcon';
 import ClusterBoundaryController from '../components/ClusterBoundaryController';
+import NavigateToTarget from '../components/navigation/NavigateToTarget';
 
 // Approximate Balaghat exploration boundary
 const BALAGHAT_BOUNDARY: [number, number][] = [
@@ -27,6 +28,25 @@ export default function ProspectivityExplorer() {
 
   const [targets, setTargets] = useState<any[]>([]);
   const [selectedTargetData, setSelectedTargetData] = useState<any | null>(null);
+
+  // Navigate-to-Target overlay state
+  const [navOpen, setNavOpen] = useState(false);
+  // User's coarse location for distance sorting in target list (demo fallback inside hook)
+  const [explorerUserLoc, setExplorerUserLoc] = useState({ lat: 21.83, lng: 80.14 });
+  const [explorerGpsReal, setExplorerGpsReal] = useState(false);
+
+  // Attempt GPS once on mount for distance calculations in target list
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setExplorerUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setExplorerGpsReal(true);
+      },
+      () => { /* keep demo */ },
+      { enableHighAccuracy: false, timeout: 5000 }
+    );
+  }, []);
 
   const [layers, setLayers] = useState({
     spectral: false,
@@ -178,9 +198,22 @@ export default function ProspectivityExplorer() {
             </button>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <TargetIntelligencePanel target={selectedTargetData} />
+            <TargetIntelligencePanel
+              target={selectedTargetData}
+              onNavigate={() => setNavOpen(true)}
+            />
           </div>
         </div>
+      )}
+
+      {/* Full-screen Navigate to Target overlay */}
+      {navOpen && (
+        <NavigateToTarget
+          targets={targets}
+          userLocation={explorerUserLoc}
+          isGpsReal={explorerGpsReal}
+          onClose={() => setNavOpen(false)}
+        />
       )}
     </div>
   );

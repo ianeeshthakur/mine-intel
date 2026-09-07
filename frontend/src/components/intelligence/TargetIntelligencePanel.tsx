@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { MapPin, ShieldAlert, ArrowRight, BookOpen, AlertTriangle, Volume2, Square } from 'lucide-react';
+import { MapPin, ShieldAlert, ArrowRight, BookOpen, AlertTriangle, Volume2, Square, Navigation } from 'lucide-react';
 import { useNarration } from '../../hooks/useNarration';
 
-export default function TargetIntelligencePanel({ target }: { target: any }) {
+export default function TargetIntelligencePanel({ target, onNavigate }: { target: any; onNavigate?: () => void }) {
   const navigate = useNavigate();
   const { play, stop, isPlaying, currentCaption } = useNarration();
 
@@ -176,6 +176,20 @@ export default function TargetIntelligencePanel({ target }: { target: any }) {
         <div className="bg-slate-900 text-white p-4 rounded-lg shadow-md">
           <div className="font-bold text-lg mb-1">FIELD GEOLOGICAL VERIFICATION</div>
           <p className="text-slate-300 text-sm mb-4">High surface and geological evidence present, but no direct subsurface confirmation.</p>
+
+          {/* ── Navigate to Target CTA (primary) ── */}
+          {onNavigate && (
+            <button
+              onClick={onNavigate}
+              className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-bold py-2.5 px-4 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2 mb-2 shadow-lg shadow-red-900/30"
+            >
+              <Navigation className="w-4 h-4" />
+              Navigate to Target
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* ── Field Verification (secondary) ── */}
           <button 
             onClick={() => navigate(`/verification?target=${target.targetId}`)}
             className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded transition-colors flex items-center justify-center gap-2"
