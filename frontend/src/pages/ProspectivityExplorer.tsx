@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Polygon, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
@@ -10,6 +10,7 @@ import HeatmapLayer from '../components/HeatmapLayer';
 import ProspectivityLegend from '../components/ProspectivityLegend';
 import TargetIntelligencePanel from '../components/intelligence/TargetIntelligencePanel';
 import { createProspectivityClusterIcon } from '../components/createProspectivityClusterIcon';
+import ClusterBoundaryController from '../components/ClusterBoundaryController';
 
 // Approximate Balaghat exploration boundary
 const BALAGHAT_BOUNDARY: [number, number][] = [
@@ -18,6 +19,9 @@ const BALAGHAT_BOUNDARY: [number, number][] = [
 ];
 
 export default function ProspectivityExplorer() {
+  // Ref passed to MarkerClusterGroup so ClusterBoundaryController
+  // can attach the clusterclick listener to the underlying L.MarkerClusterGroup
+  const clusterGroupRef = useRef<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedTargetId = searchParams.get('target');
 
@@ -118,8 +122,15 @@ export default function ProspectivityExplorer() {
           )}
 
           {/* Clustered priority targets — independent of heatmap */}
+          {/* ClusterBoundaryController must be inside MapContainer to access useMap() */}
+          <ClusterBoundaryController clusterGroupRef={clusterGroupRef} />
+
           {layers.priorityTargets && (
-            <MarkerClusterGroup iconCreateFunction={createProspectivityClusterIcon} maxClusterRadius={60}>
+            <MarkerClusterGroup
+              ref={clusterGroupRef}
+              iconCreateFunction={createProspectivityClusterIcon}
+              maxClusterRadius={60}
+            >
               {targets.map(target => (
                 <CircleMarker
                   key={target.id}
