@@ -18,7 +18,7 @@ import java.util.Map;
 public class GeminiService {
 
     private static final String GEMINI_API_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -100,6 +100,7 @@ public class GeminiService {
                     return "I wasn't able to generate a response. Please try again.";
                     
                 } catch (Exception e) {
+                    log.error("Exception from Gemini API: {}", e.getMessage(), e);
                     if (e.getMessage() != null && e.getMessage().contains("429")) {
                         if (attempt == maxRetries) {
                             log.error("Gemini API rate limit exceeded after {} attempts", maxRetries);
